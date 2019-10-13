@@ -1,0 +1,89 @@
+<div id="events">&nbsp;</div>
+
+<script>
+
+// Get JSON for events and put it into HTML
+
+var url = ""; // URL to where you are getting JSON that is from the LibCal API. 
+var events = "";
+
+
+$.getJSON(url, function(data){
+    loadEvents(data);
+    events = data;
+  });
+
+
+// FUNCTIONS
+function loadEvents(events){
+
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var eventHTML = "<div class='events'><h2>Events</h2>";
+
+    
+    // Build data model that's needed for display  (could move to serverside)
+    for (var i = events.length - 1; i >= 0; i--) {
+      y = events[i];
+      for (var i = y.length - 1; i >= 0; i--) {
+        e=y[i];
+          msec = Date.parse(e.start);
+          var date = new Date(msec);
+          eventHTML += "<div class='eventcard'>";
+          eventHTML += "<div class='eventdate'>"+months[date.getMonth()].slice(0,3) + " "  +date.getDate() + "</div>";
+          eventHTML += "<div class='eventinfo'><ul>";
+          eventHTML += "<li class='eventtitle'><h3>"+e.title+"</h3></li>";
+          eventHTML += "<li class='eventtime'>"+formatTime(date)+"</li>";
+          eventHTML += "<li class='eventpresenter'>"+e.presenter+"</li>";
+          eventHTML += "<li class=''><a href='"+e.url.public+"' target='_blank'>More info</a></li>";
+          eventHTML += "</ul></div>";
+      }
+    }
+
+    eventHTML += "</div>";
+
+    // Write HTML to container
+    document.getElementById('events').innerHTML = eventHTML;
+}
+
+function formatTime(date){
+  var time = "";
+  var ampm = "AM";
+  hours = date.getHours();
+  if(hours > 12){
+    hours = hours - 12;
+    ampm = "PM";
+  }
+
+  time = hours + ":" +date.getMinutes()+" "+ampm;
+  return time;
+}
+
+</script>
+
+<style>
+
+  /* CSS for the accompanying HTML */
+  .eventcard {
+    padding: 1em;
+    background-color:#f5f5f5;
+    display: flex;
+  }
+  .eventdate  {
+    min-width: 4.4rem;
+    height: 6rem;
+    margin-right: 1rem;
+    background-color:#0069aa;
+    color:#fff;
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 5px;
+  }
+
+.eventinfo ul{
+  list-style: none;
+}
+.eventtitle h3 {
+    font-size: large;
+}
+
+</style>
