@@ -18,11 +18,12 @@ $.getJSON(url, function(data){
 function loadEvents(events){
 
     var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    var eventHTML = "<div class='events'><h2>Events</h2>";
 
+    var eventHTML = "<div class='events'><h2>Events</h2>";
     
     // Build data model that's needed for display  (could move to serverside)
-    for (var i = events.length - 1; i >= 0; i--) {
+    if(events.length > 0){
+      for (var i = events.length - 1; i >= 0; i--) {
       y = events[i];
       for (var i = y.length - 1; i >= 0; i--) {
         e=y[i];
@@ -40,9 +41,12 @@ function loadEvents(events){
     }
 
     eventHTML += "</div>";
-
-    // Write HTML to container
-    document.getElementById('events').innerHTML = eventHTML;
+  }else{
+    eventHTML += "There are no events on the calendar at the moment.</div>";
+  }
+    
+  // Write HTML to container
+  document.getElementById('events').innerHTML = eventHTML;
 }
 
 function formatTime(date){
