@@ -34,6 +34,9 @@ function loadEvents(events){
           eventHTML += "<div class='eventinfo'><ul>";
           eventHTML += "<li class='eventtitle'><h3>"+e.title+"</h3></li>";
           eventHTML += "<li class='eventtime'>"+formatTime(date)+"</li>";
+          if(e.location.name !== ""){
+            eventHTML += "<li class='eventlocation'>"+e.location.name+"</li>";
+          }
           eventHTML += "<li class='eventpresenter'>"+e.presenter+"</li>";
           eventHTML += "<li class=''><a href='"+e.url.public+"' target='_blank'>More info</a></li>";
           eventHTML += "</ul></div>";
