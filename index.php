@@ -71,8 +71,9 @@ foreach ($cal_ids as $key => $value) {
 
 // Merge the events from the different calendars into one array
 foreach ($events as $key => $array){
-  $fullevents[] = $array['events'];
+  $fullevents = $array['events'];
 }
+$fullevents = array_reverse($fullevents);
 
 // Prepare and output the JSON
 $eventsJSON = json_encode($fullevents);

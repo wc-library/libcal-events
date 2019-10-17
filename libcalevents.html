@@ -24,25 +24,27 @@ function loadEvents(events){
     // Build data model that's needed for display  (could move to serverside)
     if(events.length > 0){
       for (var i = events.length - 1; i >= 0; i--) {
-      y = events[i];
-      for (var i = y.length - 1; i >= 0; i--) {
-        e=y[i];
-          msec = Date.parse(e.start);
+      e = events[i];
+          var msec = Date.parse(e.start);
           var date = new Date(msec);
           eventHTML += "<div class='eventcard'>";
-          eventHTML += "<div class='eventdate'>"+months[date.getMonth()].slice(0,3) + " "  +date.getDate() + "</div>";
+          eventHTML += "<div class='eventdate'>"+months[date.getMonth()].slice(0,3) + "<br />"  +date.getDate() + "</div>";
           eventHTML += "<div class='eventinfo'><ul>";
           eventHTML += "<li class='eventtitle'><h3>"+e.title+"</h3></li>";
-          eventHTML += "<li class='eventtime'>"+formatTime(date)+"</li>";
+          eventHTML += "<li class='eventtime'>"+formatTime(e.start);
+          if(e.end){
+            eventHTML += " - " + formatTime(e.end) + "</li>";
+          }
+          else{
+            eventHTML +="</li>";
+          }
           if(e.location.name !== ""){
             eventHTML += "<li class='eventlocation'>"+e.location.name+"</li>";
           }
           eventHTML += "<li class='eventpresenter'>"+e.presenter+"</li>";
           eventHTML += "<li class=''><a href='"+e.url.public+"' target='_blank'>More info</a></li>";
-          eventHTML += "</ul></div>";
+          eventHTML += "</ul></div></div>";
       }
-    }
-
     eventHTML += "</div>";
   }else{
     eventHTML += "There are no events on the calendar at the moment.</div>";
@@ -52,7 +54,9 @@ function loadEvents(events){
   document.getElementById('events').innerHTML = eventHTML;
 }
 
-function formatTime(date){
+function formatTime(etime){
+  var msec = Date.parse(etime);
+  var date = new Date(msec);
   var time = "";
   var ampm = "AM";
   hours = date.getHours();
@@ -61,7 +65,11 @@ function formatTime(date){
     ampm = "PM";
   }
 
-  time = hours + ":" +date.getMinutes()+" "+ampm;
+  var min = date.getMinutes();
+  if(min === 0){
+    min = "00";
+  }
+  time = hours + ":" + min +" "+ampm;
   return time;
 }
 
@@ -75,6 +83,7 @@ function formatTime(date){
     background-color:#f5f5f5;
     display: flex;
     border-radius: 2px;
+    margin-bottom: 1em;
   }
   .eventdate  {
     min-width: 4.4rem;
@@ -93,6 +102,9 @@ function formatTime(date){
 }
 .eventtitle h3 {
     font-size: large;
+}
+.eventlocation {
+  font-style: italic;
 }
 
 </style>
