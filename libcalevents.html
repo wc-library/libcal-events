@@ -1,11 +1,9 @@
 <div id="events">&nbsp;</div>
-
 <script>
 
 // Get JSON for events and put it into HTML
 
-var url = ""; // URL to where you are getting JSON that is from the LibCal API. 
-var limit = 3; //Max events to display
+var url = "https://api.library.wheaton.edu/libcal/"; // URL to where you are getting JSON that is from the LibCal API. 
 var events = "";
 
 
@@ -24,11 +22,7 @@ function loadEvents(events){
     
     // Build data model that's needed for display  (could move to serverside)
     if(events.length > 0){
-      var l = events.length;
-      for (var i = l - 1; i >= 0; i--) {
-        if( i < l - limit ){
-          break;
-        }
+      for (var i = events.length - 1; i >= 0; i--) {
       e = events[i];
           var msec = Date.parse(e.start);
           var date = new Date(msec);
@@ -43,6 +37,20 @@ function loadEvents(events){
           else{
             eventHTML +="</li>";
           }
+          if(e.audience){
+            eventHTML += "<li class='eventaudience'>Audience: ";
+            for (var a = e.audience.length - 1; a >= 0; a--) {
+              eventHTML += "<em>"+e.audience[a].name+"</em>";
+              if (a>0) { 
+                eventHTML += ",";
+                
+              } 
+              else if (a==0){
+                eventHTML += "</li>";
+              } 
+            }
+
+          }
           if(e.location.name !== ""){
             eventHTML += "<li class='eventlocation'>"+e.location.name+"</li>";
           }
@@ -52,7 +60,7 @@ function loadEvents(events){
       }
     eventHTML += "</div>";
   }else{
-    eventHTML += "There are no upcoming events at the moment.</div>";
+    eventHTML += "There are no events on the calendar at the moment.</div>";
   }
     
   // Write HTML to container
@@ -65,8 +73,10 @@ function formatTime(etime){
   var time = "";
   var ampm = "AM";
   hours = date.getHours();
-  if(hours > 12){
-    hours = hours - 12;
+  if(hours >= 12){
+    if (hours > 12) {
+        hours = hours - 12;
+        }
     ampm = "PM";
   }
 
@@ -79,10 +89,7 @@ function formatTime(etime){
 }
 
 </script>
-
-<style>
-
-  /* CSS for the accompanying HTML */
+<style type="text/css">/* CSS for the accompanying HTML */
   .eventcard {
     padding: 1em;
     background-color:#f5f5f5;
@@ -111,5 +118,4 @@ function formatTime(etime){
 .eventlocation {
   font-style: italic;
 }
-
 </style>
