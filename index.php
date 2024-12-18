@@ -44,7 +44,7 @@ function getEventsResults($base_url, $token, $cal_id){
         $options = array('http' => array( 'method' => 'GET', 'header' => 'Content-Type:application/json', 'header'=> 'Authorization: Bearer '.$token));
         $context = stream_context_create($options);
 
-        $result = file_get_contents($url."?cal_id=".$cal_id, false, $context);
+        $result = file_get_contents($url."?cal_id=".$cal_id."&days=180&limit=5", false, $context);
 
         // Process the request results
         if ($result === FALSE){
