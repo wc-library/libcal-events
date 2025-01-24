@@ -71,7 +71,19 @@ foreach ($cal_ids as $key => $value) {
 
 // Merge the events from the different calendars into one array
 foreach ($events as $key => $array){
-  $fullevents = $array['events'];
+  $fullevents = array_merge($fullevents, $array['events']);
+}
+
+
+$sorted = usort($fullevents, function($a, $b)
+{
+    return (strtotime($a["start"]) < strtotime($b["start"])) ? +1 : -1;
+
+});
+if($sorted){
+$fullevents = array_reverse($fullevents);
+}else{
+null;
 }
 $fullevents = array_reverse($fullevents);
 
