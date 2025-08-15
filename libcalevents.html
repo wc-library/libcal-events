@@ -14,15 +14,136 @@ $.getJSON(url, function(data){
 
 
 // FUNCTIONS
+function processEventList(events) {
+  if (!events || events.length === 0) {
+    return events;
+  }
+
+  // Extract all event_ids from future_dates to identify series
+  const allEventIds = new Set();
+  const eventIdToSeriesMap = new Map(); // Maps event_ids to series identifiers
+  let seriesCounter = 0;
+  
+  // First pass: collect all event_ids and create series mappings
+  events.forEach(event => {
+    if (event.future_dates && event.future_dates.length > 0) {
+      // Check if this event connects to an existing series
+      let foundSeries = false;
+      let seriesId = null;
+      
+      for (const futureDate of event.future_dates) {
+        const eventId = futureDate.event_id;
+        allEventIds.add(eventId);
+        
+        // If this event_id is already part of a series
+        if (eventIdToSeriesMap.has(eventId)) {
+          seriesId = eventIdToSeriesMap.get(eventId);
+          foundSeries = true;
+          break;
+        }
+      }
+      
+      // If not found in existing series, create a new one
+      if (!foundSeries) {
+        seriesId = `series_${seriesCounter++}`;
+      }
+      
+      // Assign all future_date event_ids to this series
+      event.future_dates.forEach(futureDate => {
+        eventIdToSeriesMap.set(futureDate.event_id, seriesId);
+      });
+      
+      // Also assign this event's id to the series if it exists
+      if (event.id) {
+        eventIdToSeriesMap.set(event.id, seriesId);
+      }
+    }
+  });
+  
+  // If no events have future_dates, return the original array
+  if (allEventIds.size === 0) {
+    return events;
+  }
+  
+  // Second pass: group events by series
+  const seriesGroups = new Map(); // Maps series identifiers to arrays of events
+  
+  events.forEach(event => {
+    // Skip events without IDs
+    if (!event.id) {
+      return;
+    }
+    
+    let seriesId = eventIdToSeriesMap.get(event.id);
+    
+    // If the event ID isn't in our map but it has future_dates, 
+    // check its future_dates for series membership
+    if (!seriesId && event.future_dates && event.future_dates.length > 0) {
+      for (const futureDate of event.future_dates) {
+        seriesId = eventIdToSeriesMap.get(futureDate.event_id);
+        if (seriesId) break;
+      }
+    }
+    
+    // If this event belongs to a series, add it to that group
+    if (seriesId) {
+      if (!seriesGroups.has(seriesId)) {
+        seriesGroups.set(seriesId, []);
+      }
+      seriesGroups.get(seriesId).push(event);
+    }
+  });
+  
+  // Create a set to track which events to include
+  const eventsToInclude = new Set();
+  
+  // Process each series, keeping only the earliest two events
+  seriesGroups.forEach(seriesEvents => {
+    // Sort the series events by date
+    seriesEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
+    
+    // Take only the earliest two events from the series
+    eventsToInclude.add(seriesEvents[0].id);
+    if (seriesEvents.length > 1) {
+      eventsToInclude.add(seriesEvents[1].id);
+    }
+  });
+  
+  // Filter the events list
+  const processedEvents = events.filter(event => {
+    // Include all events without an ID
+    if (!event.id) {
+      return true;
+    }
+    
+    // Include events not part of any series
+    if (!eventIdToSeriesMap.has(event.id)) {
+      return true;
+    }
+    
+    // Include events that were selected from their series
+    return eventsToInclude.has(event.id);
+  });
+  
+  // Sort the processed events by date
+  processedEvents.sort((a, b) => {
+    return new Date(a.start) - new Date(b.start);
+  });
+  
+  return processedEvents;
+}
+
 function loadEvents(events){
 
     var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
+    
     var eventHTML = "<div class='events'><h2>Events</h2>";
     
     // Build data model that's needed for display  (could move to serverside)
     if(events.length > 0){
-      for (var i = events.length - 1; i >= 0; i--) {
+      // Process the events to filter recurring series
+      events = processEventList(events);
+      for (var i = 0; i < events.length; i++) {
       e = events[i];
           var msec = Date.parse(e.start);
           var date = new Date(msec);
@@ -60,7 +181,7 @@ function loadEvents(events){
       }
     eventHTML += "</div>";
   }else{
-    eventHTML += "There are no events on the calendar at the moment.</div>";
+    eventHTML += "There are no events on the calendar in the next 6 months at the moment.</div>";
   }
     
   // Write HTML to container
@@ -99,13 +220,13 @@ function formatTime(etime){
   }
   .eventdate  {
     min-width: 4.4rem;
-    height: 6rem;
+    height: 5rem;
     margin-right: 1rem;
     background-color:#0069aa;
     color:#fff;
     text-align: center;
     margin-top: 24px;
-    padding-top: 5px;
+    padding-top: 1rem;
     border-radius: 2px;
   }
 
