@@ -75,17 +75,10 @@ foreach ($events as $key => $array){
 }
 
 
-$sorted = usort($fullevents, function($a, $b)
+usort($fullevents, function($a, $b)
 {
-    return (strtotime($a["start"]) < strtotime($b["start"])) ? +1 : -1;
-
+    return strtotime($a["start"]) - strtotime($b["start"]);
 });
-if($sorted){
-$fullevents = array_reverse($fullevents);
-}else{
-null;
-}
-$fullevents = array_reverse($fullevents);
 
 // Prepare and output the JSON
 $eventsJSON = json_encode($fullevents);
