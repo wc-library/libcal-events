@@ -219,7 +219,8 @@ function formatTime(etime){
     margin-bottom: 1em;
   }
   .eventdate  {
-    min-width: 4.4rem;
+    flex-shrink: 0;
+    width: 4.4rem;
     height: 5rem;
     margin-right: 1rem;
     background-color:#0069aa;
@@ -230,8 +231,16 @@ function formatTime(etime){
     border-radius: 2px;
   }
 
+.eventinfo {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
 .eventinfo ul{
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 .eventtitle h3 {
     font-size: large;
